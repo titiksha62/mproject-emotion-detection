@@ -1,0 +1,27 @@
+# Core ML
+torch>=2.0.0
+torchvision
+torchaudio
+numpy
+pandas
+scipy
+scikit-learn
+
+# Visual Stream
+ultralytics # For YOLOv8
+insightface
+onnxruntime # CPU optimized execution for insightface
+opencv-python
+
+# Acoustic Stream
+librosa
+transformers # For Audio Spectrogram Transformer (AST)
+
+# Lexical Stream & Guardrails
+transformers # For RoBERTa
+sentencepiece
+
+# App & Queuing
+streamlit
+plotly
+asyncio
