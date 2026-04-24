@@ -68,7 +68,12 @@ class EmotionDataset(Dataset):
             # Fallback for missing/corrupted wav
             audio_input = torch.zeros((10, 156), dtype=torch.float32) # Approx size for 3.6s
             
-        return audio_input, visual_input, torch.tensor(label, dtype=torch.long)
+        # 3. Dummy Lexical Stream
+        # RAVDESS has no text, so we pass a static dummy string. RoBERTa will encode this 
+        # into a neutral vector, and the cross-attention will learn to ignore it.
+        lexical_input = "[NO_SPEECH]"
+            
+        return lexical_input, audio_input, visual_input, torch.tensor(label, dtype=torch.long)
 
 
 # --- FINE TUNING ENGINE ---
@@ -127,15 +132,16 @@ def train_model():
         print(f"\nEpoch {epoch+1}/{CONFIG['epochs']}")
         train_bar = tqdm(train_loader, desc="Training")
         
-        for audio_inputs, visual_inputs, labels in train_bar:
+        for lexical_inputs, audio_inputs, visual_inputs, labels in train_bar:
+            # Note: lexical_inputs is a list of strings, so it doesn't need .to(device)
             audio_inputs = audio_inputs.to(CONFIG["device"])
             visual_inputs = visual_inputs.to(CONFIG["device"])
             labels = labels.to(CONFIG["device"])
             
             optimizer.zero_grad()
             
-            # Forward pass
-            logits, _, _ = model(audio_inputs, visual_inputs)
+            # Forward pass (Tri-Modal)
+            logits, _, _, _, _ = model(lexical_inputs, visual_inputs, audio_inputs)
             loss = criterion(logits, labels)
             
             # Backward pass
@@ -161,12 +167,12 @@ def train_model():
         val_total = 0
         
         with torch.no_grad():
-            for audio_inputs, visual_inputs, labels in tqdm(val_loader, desc="Validating"):
+            for lexical_inputs, audio_inputs, visual_inputs, labels in tqdm(val_loader, desc="Validating"):
                 audio_inputs = audio_inputs.to(CONFIG["device"])
                 visual_inputs = visual_inputs.to(CONFIG["device"])
                 labels = labels.to(CONFIG["device"])
                 
-                logits, _, _ = model(audio_inputs, visual_inputs)
+                logits, _, _, _, _ = model(lexical_inputs, visual_inputs, audio_inputs)
                 loss = criterion(logits, labels)
                 
                 val_loss += loss.item() * audio_inputs.size(0)
