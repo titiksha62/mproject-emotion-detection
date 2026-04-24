@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.zip
+data/
+datasets/
+kaggle_dataset/
+models/
+results/
+*.pyc
+.env
