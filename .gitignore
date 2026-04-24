@@ -4,7 +4,6 @@ __pycache__/
 data/
 datasets/
 kaggle_dataset/
-models/
 results/
 *.pyc
 .env
