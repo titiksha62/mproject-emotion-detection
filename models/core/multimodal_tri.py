@@ -27,7 +27,7 @@ class MultiModalCNNTri(nn.Module):
         self.classifier = nn.Sequential(
             nn.Linear(embed_dim * 3, 256),
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(0.4),
             nn.Linear(256, num_classes)
         ).to(device)
 

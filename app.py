@@ -41,12 +41,18 @@ st.markdown("""
 st.title("🧠 Tri-Modal HCR-CAF Emotion AI")
 st.markdown("End-to-End Multimodal Emotion Recognition (Video + Audio + Text).")
 
+from src.pipeline.partial_loader import load_partial_weights
+
 @st.cache_resource
 def load_tri_model():
     # Force CPU for stability as requested
     model = MultiModalCNNTri(num_classes=NUM_CLASSES, embed_dim=128, device='cpu')
-    # If you have weights, load them here:
-    # model.load_state_dict(torch.load("path_to_weights.pth", map_location='cpu'))
+    
+    # Safely load the legacy weights into the new architecture
+    pth_path = "results/RAVDESS_multimodalcnn_15_best0.pth"
+    if os.path.exists(pth_path):
+        load_partial_weights(model, pth_path, device='cpu')
+        
     model.eval()
     return model
 
